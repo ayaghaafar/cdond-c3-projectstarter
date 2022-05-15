@@ -310,8 +310,21 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
       - build-backend
-      - test-frontend
-      - test-backend
-      - scan-frontend
+      - build-frontend
+      - test-backend:
+          requires:
+            - build-backend
+      - test-frontend:
+          requires:
+            - build-frontend
+      # - analyze-backend:
+      #     requires:
+      #       - test-backend
+      # - analyze-frontend:
+      #     requires:
+      #       - test-frontend
+      # - deploy_backend_infrastructure:
+      #     requires:
+      #       - analyze_backend
+      #       - analyze_frontend
