@@ -41,7 +41,6 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run: npm i --prefix frontend
-      - run: npm run test --prefix frontend
       - persist_to_workspace:
           root: ~/
           paths:
@@ -58,7 +57,6 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run: npm i --prefix backend
-      - run: npm run test --prefix backend
       - persist_to_workspace:
           root: ~/
           paths:
@@ -74,13 +72,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [test-frontend]
-      - run:
-          name: front-end build
-          command: |
-            cd frontend
-            npm install
-            npm run test
-             exit 1
+      - run: npm i --prefix frontend
+      - run: npm run test --prefix frontend
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -92,13 +85,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [test-backend]
-      - run:
-          name: back-end test
-          command: |
-            cd backend
-            npm install
-            npm run test
-             exit 1
+      - run: npm i --prefix backend
+      - run: npm run test --prefix backend
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
