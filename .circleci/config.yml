@@ -101,6 +101,7 @@ jobs:
       - run: npm i --prefix backend
       - run: npm run test --prefix backend
       - run: npm audit --audit-level=critical --force --prefix backend
+      - run: npm audit fix --audit-level=critical --force --prefix backend
 
   analyze-frontend:
     docker:
@@ -112,6 +113,7 @@ jobs:
       - run: npm i --prefix frontend
       - run: npm run test --prefix frontend
       - run: npm audit --audit-level=critical --force --prefix frontend
+      - run: npm audit fix --audit-level=critical --force --prefix frontend
 
 #   deploy-infrastructure:
 #     docker:
