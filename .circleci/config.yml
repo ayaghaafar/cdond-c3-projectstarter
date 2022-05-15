@@ -41,7 +41,7 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run: npm i --prefix frontend
-      - run: npm run lint --prefix frontend
+      - run: npm run test --prefix frontend
       - persist_to_workspace:
           root: ~/
           paths:
@@ -58,7 +58,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run: npm i --prefix backend
-      - run: npm run lint --prefix backend
+      - run: npm run test --prefix backend
       - persist_to_workspace:
           root: ~/
           paths:
