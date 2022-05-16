@@ -240,12 +240,14 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/
-      - run:
-          name: Run DB migrations
-          command: |
-            cd backend
-            npm run migrations > migration_output.txt
-            cat migration_output.txt
+      - run: npm run migrations > migration_output.txt
+      - run: cat migration_output.txt
+      # - run:
+      #     name: Run DB migrations
+      #     command: |
+      #       cd backend
+      #       npm run migrations > migration_output.txt
+      #       cat migration_output.txt
       - run:
           name: Store migration result in a file.
           command: |
