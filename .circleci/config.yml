@@ -416,3 +416,6 @@ workflows:
       - run-db-migrations-for-backend:
           requires:
             - deploy-backend-infrastructure
+      - deploy-backend-artifact:
+          requires:
+            - run-db-migrations-for-backend
