@@ -297,11 +297,11 @@ jobs:
       - run:
           name: Build backend app
           command: |
-          cd frontend
-          npm install
-          npm run build
-          tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-          aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            cd backend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - add_ssh_keys:
           fingerprints: [ "c3:ed:92:e4:18:e1:05:9b:0e:87:e3:32:37:a4:e2:8b:f1:5d:2d:31" ]
       - run:
