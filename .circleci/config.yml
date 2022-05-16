@@ -238,22 +238,33 @@ jobs:
 #             exit 1
 #       # Here's where you will add some code to rollback on failure      
 
-#   run-migrations:
-#     docker:
-#       # Docker image here that supports NodeJS
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Run migrations
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Send migration results to memstash
-#           command: |
-#             # Your code here
-#             exit 1
-#      # Here's where you will add some code to rollback on failure      
+  run-db-migrations-for-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run DB migrations
+          command: |
+            cd backend
+            npm run migrations >> migration_output.txt
+            cat migration_output.txt
+      - run:
+          name: Store migration result in a file.
+          command: |
+            cd backend
+            if grep -q "has been executed successfully." migration_output.txt
+            then
+              touch ~/project/.circleci/outputs/db_migration_success
+            fi
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/outputs/
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
 #   deploy-frontend:
 #     docker:
@@ -276,21 +287,41 @@ jobs:
 #             # your code here
 #       # Here's where you will add some code to rollback on failure      
                     
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
+  deploy-backend-artifact:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl nodejs npm ansible zip
+            pip install awscli
+      - run:
+          name: Build backend app
+          command: |
+            cd ~/project/backend
+            npm i
+            npm run build
+            cd dist
+            cp ../package.json .
+            zip -rq dist.zip *
+            mkdir -p ~/project/.circleci/ansible/roles/deploy_backend/files/
+            mv dist.zip ~/project/.circleci/ansible/roles/deploy_backend/files/
+      - add_ssh_keys:
+          fingerprints: [ "c3:ed:92:e4:18:e1:05:9b:0e:87:e3:32:37:a4:e2:8b:f1:5d:2d:31" ]
+      - run:
+          name: Setup EC2 instance & copy compiled backend to the EC2 instance
+          command: |
+            ls ~/project/.circleci/ansible/roles/deploy_backend/files/
+            cd ~/project/backend
+            ansible-galaxy install weareinteractive.environment
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/playbook.yml
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - undo_migrations
 #       # Here's where you will add some code to rollback on failure  
 
 #   smoke-test:
@@ -382,3 +413,6 @@ workflows:
           filters:
             branches:
               only: [ master ]
+      - run-db-migrations-for-backend:
+          requires:
+            - deploy-backend-infrastructure
