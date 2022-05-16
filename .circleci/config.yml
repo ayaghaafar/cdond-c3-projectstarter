@@ -493,7 +493,7 @@ workflows:
             - run-db-migrations-for-backend
       - smoke_test_backend:
           requires:
-            - deploy_backend_artifact
+            - deploy-backend-artifact
       - smoke_test_frontend:
           requires:
             - deploy_frontend_artifact          
