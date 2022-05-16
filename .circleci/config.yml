@@ -176,6 +176,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run: yum -y install tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -206,7 +207,6 @@ jobs:
             echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
             cat .circleci/outputs/backend_url.txt
             exit 1
-      - run: yum -y install tar gzip
       - persist_to_workspace:
           root: ~/
           paths:
