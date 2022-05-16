@@ -470,5 +470,5 @@ workflows:
             - run-db-migrations-for-backend
       - deploy_frontend_artifact:
           requires:
-            - deploy_frontend_infrastructure
-            - run_db_migrations_for_backend
+            - deploy-frontend-infrastructure
+            - run-db-migrations-for-backend
