@@ -319,6 +319,60 @@ jobs:
       - revert-migrations
 #       # Here's where you will add some code to rollback on failure  
 
+  deploy_frontend_artifact:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl nodejs npm
+            pip install awscli
+      - run:
+          name: Package frontend app
+          command: |
+            export API_URL=`cat .circleci/outputs/backend_url.txt`
+            echo "API_URL: $API_URL"
+            apk add --update curl tar
+            pip install awscli
+            cd ~/project/frontend
+            npm i
+            npm install typescript@rc
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/frontend/dist
+      - destroy_environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations
+
+  # deploy_frontend_artifact:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update curl tar
+  #           pip install awscli
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Copy frontend to s3 bucket.
+  #         command: |
+  #           cd ~/project/frontend
+  #           aws s3 cp dist s3://udapeople-prod-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+  #     - destroy_environment:
+  #         workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+  #     - revert-migrations
+
 #   smoke-test:
 #     docker:
 #       # Lightweight Docker image 
@@ -414,3 +468,7 @@ workflows:
       - deploy-backend-artifact:
           requires:
             - run-db-migrations-for-backend
+      - deploy_frontend_artifact:
+          requires:
+            - deploy_frontend_infrastructure
+            - run_db_migrations_for_backend
