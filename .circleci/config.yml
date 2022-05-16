@@ -392,7 +392,7 @@ jobs:
             fi
       - destroy_environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - undo_migrations
+      - revert-migrations
 
   smoke_test_backend:
     docker:
@@ -413,7 +413,7 @@ jobs:
             curl -s $API_URL/api/status
       - destroy_environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - undo_migrations
+      - revert-migrations
 
 #   cloudfront-update:
 #     docker:
