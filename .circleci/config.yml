@@ -336,8 +336,6 @@ jobs:
           command: |
             export API_URL=`cat .circleci/outputs/backend_url.txt`
             echo "API_URL: $API_URL"
-            apk add --update curl tar
-            pip install awscli
             cd ~/project/frontend
             npm i
             npm install typescript@rc
