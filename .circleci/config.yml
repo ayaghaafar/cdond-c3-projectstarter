@@ -505,9 +505,10 @@ workflows:
           requires:
             - deploy-frontend-infrastructure
             - run-db-migrations-for-backend
-      - smoke_test_backend:
-          requires:
-            - deploy-backend-artifact
-      - smoke_test_frontend:
-          requires:
-            - deploy_frontend_artifact          
+      # - smoke_test_backend:
+      #     requires:
+      #       - deploy-backend-artifact
+      # - smoke_test_frontend:
+      #     requires:
+      #       - deploy_frontend_artifact 
+      - deploy_cloudfront_infrastructure    
