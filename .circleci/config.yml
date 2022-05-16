@@ -171,32 +171,20 @@ jobs:
           event: pass
           template: success_tagged_deploy_1
 
-  deploy-infrastructure:
+  deploy-backend-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: yum -y install tar gzip
       - run:
-          name: Ensure back-end infrastructure exists
+          name: Deploy the backend infrastructure using cloudformation
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              exit 1
+              --template-file .circleci/cloudformation/backend_infrastructure.yml \
+              --parameter-overrides ID="prod-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name udapeople-backend-prod-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
-          name: Ensure front-end infrastructure exist
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              exit 1
-      - run:
-          name: Add back-end ip to ansible inventory
+          name: Save backend URL and IP (for ansible)
           command: |
             BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-prod-${CIRCLE_WORKFLOW_ID:0:7}" \
@@ -206,14 +194,30 @@ jobs:
             echo "[all]" >> .circleci/ansible/inventory.txt
             echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
             cat .circleci/outputs/backend_url.txt
-            exit 1
+      - run: yum -y install tar gzip
       - persist_to_workspace:
           root: ~/
           paths:
+            - project/.circleci/outputs/backend_url.txt
             - project/.circleci/ansible/inventory.txt
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       # Here's where you will add some code to rollback on failure      
+
+  deploy-frontend-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy the frontend infrastructure using cloudformation
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/cloudformation/frontend_infrastructure.yml \
+              --parameter-overrides ID="prod-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name udapeople-frontend-prod-${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
 #   configure-infrastructure:
 #     docker:
@@ -364,7 +368,17 @@ workflows:
       - analyze-frontend:
           requires:
             - test-frontend
-      - deploy-infrastructure:
+      - deploy-backend-infrastructure:
           requires:
             - analyze-backend
             - analyze-frontend
+          filters:
+            branches:
+              only: [ master ]
+      - deploy-frontend-infrastructure:
+          requires:
+            - analyze-backend
+            - analyze-frontend
+          filters:
+            branches:
+              only: [ master ]
