@@ -415,7 +415,7 @@ jobs:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations
 
-  deploy-cloudfront-infrastructure:
+  update-cloudfront-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
