@@ -16,18 +16,18 @@ commands:
             aws cloudformation delete-stack --stack-name udapeople-backend-prod-<<parameters.workflow_id>>
             aws s3 rm s3://udapeople-prod-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-prod-<<parameters.workflow_id>>
-  undo-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    steps:
-      - run:
-          name: Revert migrations
-          when: on_fail
-          command: |
-            cd ~/project/backend
-            if [[ -f "~/project/.circleci/outputs/db_migration_success" ]]; then
-              npm i
-              npm run migration:revert
-            fi
+  # undo-migrations:
+  #   description: Revert the last migration if successfully run in the current workflow.
+  #   steps:
+  #     - run:
+  #         name: Revert migrations
+  #         when: on_fail
+  #         command: |
+  #           cd ~/project/backend
+  #           if [[ -f "~/project/.circleci/outputs/db_migration_success" ]]; then
+  #             npm i
+  #             npm run migration:revert
+  #           fi
 
 #   revert-migrations:
   revert-migrations:
@@ -244,6 +244,7 @@ jobs:
           name: Run DB migrations
           command: |
             cd backend
+            npm install
             npm run migrations >> migration_output.txt
             cat migration_output.txt
       - run:
