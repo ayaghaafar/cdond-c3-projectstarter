@@ -415,7 +415,7 @@ jobs:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations
 
-  deploy_cloudfront_infrastructure:
+  deploy-cloudfront-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -501,7 +501,7 @@ workflows:
       - deploy-backend-artifact:
           requires:
             - run-db-migrations-for-backend
-      - deploy_frontend_artifact:
+      - deploy-frontend-artifact:
           requires:
             - deploy-frontend-infrastructure
             - run-db-migrations-for-backend
@@ -511,4 +511,6 @@ workflows:
       # - smoke_test_frontend:
       #     requires:
       #       - deploy_frontend_artifact 
-      - deploy_cloudfront_infrastructure    
+      - update-cloudfront-infrastructure:
+          requires:
+            - deploy-frontend-artifact
