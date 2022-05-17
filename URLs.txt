@@ -1,0 +1,7 @@
+GitHub Repo
+==============
+https://github.com/ayaghaafar/cdond-c3-projectstarter
+
+S3 Bucket 
+===========
+https://udapeople-kk1j287dhjppmz438.s3.amazonaws.com/
